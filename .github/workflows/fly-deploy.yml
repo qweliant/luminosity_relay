@@ -13,6 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only
+      # --ha=false keeps this to a single machine. The broker's routing table
+      # is in-process actor state with no cross-node pub/sub, so two machines
+      # would put peers who land on different ones into the same room name
+      # without ever seeing each other — no error, just a room that never
+      # connects. Lift this only alongside libcluster + pg.
+      - run: flyctl deploy --remote-only --ha=false
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
